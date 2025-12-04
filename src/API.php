@@ -86,7 +86,7 @@ class API extends \Infira\MeritAktiva\General
 
 	private function send($endPoint, $payload = null, bool $stripSlashes = true)
 	{
-		$timestamp = date("YmdHis");
+		$timestamp = gmdate("YmdHis");
 		$urlParams = "";
 		$json      = "";
 		if ($payload) {
@@ -97,7 +97,7 @@ class API extends \Infira\MeritAktiva\General
 		}
 
 		$dataString            = $this->apiID . $timestamp . $json;
-		$hash                  = hash_hmac("sha256", $dataString, $this->apiKey);
+		$hash                  = hash_hmac("sha256", $dataString, $this->apiKey, true);
 		$signature             = base64_encode($hash);
 		$url                   = sprintf(
 			'%s%s?ApiId=%s&timestamp=%s&signature=%s' . $urlParams,

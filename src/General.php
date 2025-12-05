@@ -142,10 +142,6 @@ abstract class General
 				{
 					$vars[$f] = $v->getData();
 				}
-				elseif (is_float($v))
-				{
-					$vars[$f] = $this->toFloatString($v);
-				}
 			}
 
 			return $vars;

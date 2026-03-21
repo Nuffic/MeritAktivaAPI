@@ -19,6 +19,14 @@ class InvoiceRow extends \Infira\MeritAktiva\General
 		$this->taxPercent = $taxPercent;
 		$this->setMandatoryField('Item');
 	}
+
+    /**
+     * @return float
+     */
+    public function getTaxPercent(): float
+    {
+        return $this->taxPercent;
+    }
 	
 	public function setItem(\Infira\MeritAktiva\Article $Item)
 	{

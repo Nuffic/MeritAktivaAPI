@@ -82,10 +82,43 @@ abstract class InvoiceGeneral extends \Infira\MeritAktiva\General
 		return $this->get("InvoiceRow", []);
 	}
 
-	public function getTaxAmounts(): array
-	{
-		return $this->get("TaxAmount", []);
-	}
+    /**
+     * @return array
+     */
+    public function getTaxAmounts(): array
+    {
+        $totals = [];
+        foreach ($this->getRows() as $Row) {
+            $taxID = $Row->getTaxID();
+            if (!array_key_exists($taxID, $totals)) {
+                $totals[$taxID] = '0';
+            }
+
+            $totalNet = bcmul(
+                (string) $Row->getPriceNET(),
+                (string) $Row->getQuantity(),
+                6
+            );
+
+            // Recompute vatNr cleanly: (taxPercent / 100) + 1
+            $vatNr = bcadd(
+                bcdiv((string) $Row->getTaxPercent(), '100', 6),
+                '1',
+                6
+            );
+
+            // mirrors: ($price * $vatNr) - $price
+            $taxAmount = bcsub(
+                bcmul($totalNet, $vatNr, 6),
+                $totalNet,
+                6
+            );
+
+            $totals[$taxID] = bcadd($totals[$taxID], $taxAmount, 6);
+        }
+
+        return array_map(fn($amount) => bcadd($amount, '0', 2), $totals);
+    }
 
 	public function setTaxAmount(\Infira\MeritAktiva\VATObject $VATObject)
 	{
@@ -111,13 +144,20 @@ abstract class InvoiceGeneral extends \Infira\MeritAktiva\General
 	/**
 	 * Get total amount
 	 *
-	 * @param $amount
-	 * @return mixed
-	 */
-	public function getTotalAmount()
-	{
-		return $this->get("TotalAmount", 0);
-	}
+	 * @return float
+     */
+    public function getTotalAmount()
+    {
+        $total = '0';
+        foreach ($this->getRows() as $Row) {
+            $total = bcadd($total, bcmul(
+                (string) $Row->getPriceNET(),
+                (string) $Row->getQuantity(),
+                6
+            ), 6);
+        }
+        return (float) bcadd($total, '0', 2);
+    }
 
 	/**
 	 * Get total amount

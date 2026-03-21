@@ -144,7 +144,7 @@ abstract class InvoiceGeneral extends \Infira\MeritAktiva\General
 	/**
 	 * Get total amount
 	 *
-	 * @return float
+	 * @return string
      */
     public function getTotalAmount()
     {
@@ -156,7 +156,7 @@ abstract class InvoiceGeneral extends \Infira\MeritAktiva\General
                 6
             ), 6);
         }
-        return (float) bcadd($total, '0', 2);
+        return bcadd($total, '0', 2);
     }
 
 	/**

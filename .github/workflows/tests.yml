@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php-version: "7.4"
+            phpunit-version: "^9.0"
+          - php-version: "8.0"
+            phpunit-version: "^9.0"
+          - php-version: "8.1"
+            phpunit-version: "^10.0"
+          - php-version: "8.2"
+            phpunit-version: "^10.0"
+          - php-version: "8.3"
+            phpunit-version: "^10.0"
+
+    name: PHP ${{ matrix.php-version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: ':bcmath'    # disable native bcmath to test polyfill
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Require correct PHPUnit version for this PHP
+        run: composer require --dev phpunit/phpunit:"${{ matrix.phpunit-version }}" --no-update
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run tests
+        run: vendor/bin/phpunit --testdox

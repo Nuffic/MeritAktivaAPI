@@ -138,7 +138,6 @@ class API extends \Infira\MeritAktiva\General
 
 			return $error;
 		}
-        curl_close($curl);
 
         return $this->jsonDecode($curlResponse, false, $stripSlashes);
 	}
